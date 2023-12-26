@@ -1,71 +1,65 @@
-from airflow import DAG, settings
+from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.models import Connection
-import pendulum
-import psycopg2
+from datetime import datetime, timedelta
 import pandas as pd
 from sqlalchemy import create_engine
-from create_connetion import establish_connection
-
-
-# Use the function to establisch a connection
-my_postgres_conn = establish_connection('my_postgres_conn')
 
 default_args = {
     'owner': 'airflow',
-    'start_date': pendulum.today('UTC').add(days=-1),
+    'depends_on_past': False,
+    'start_date': datetime(2023, 12, 20),
     'retries': 1,
+    'retry_delay': timedelta(minutes=5),
 }
 
 dag = DAG('load_data_to_postgres',
           default_args=default_args,
-          schedule=None,
-          )
+          description='A DAG to load data into PostgreSQL',
+          schedule='@daily',
+          catchup=False
+        )
 
+CHUNKSIZE = 1000
 
 def read_csv_to_df(file_path):
     return pd.read_csv(file_path)
 
+def write_df_chunks_to_postgres(df, table_name, engine):
+    for i in range(0, len(df), CHUNKSIZE):
+        chunk = df.iloc[i:i+CHUNKSIZE]
+        chunk.to_sql(table_name, engine, if_exists='append', index=False)
+    print(f"Data written to {table_name} successfully.")
 
-def write_df_to_postgres(df, table_name):
-   
-    engine = create_engine(f'postgresql+psycopg2://{my_postgres_conn.login}:{my_postgres_conn.password}@{my_postgres_conn.host}:{my_postgres_conn.port}/{my_postgres_conn.schema}')
-
-   
-    df.to_sql(table_name, engine, if_exists='append', index=False)
-
-
-def load_data_to_postgres():
-
-    df_trajectory = read_csv_to_df('/tmp/data/trajectory_data.csv')
-    df_vehicle_positions = read_csv_to_df('/tmp/data/vehicle_positions_data.csv')
-
-    if df_trajectory.empty:
-        print("No data in trajectory DataFrame.")
+def load_data(file_path, table_name, engine):  # Modify the function to take the engine as an argument
+    df = read_csv_to_df(file_path)
+    df.columns = df.columns.str.strip()
+    if df.empty:
+        print(f"No data in {table_name} DataFrame.")
     else:
-        print("Data is available in trajectory DataFrame.")
-        print(df_trajectory.head())
+        print(f"Data is available in {table_name} DataFrame.")
+        print(df.head())
 
-    if df_vehicle_positions.empty:
-        print("No data in vehicle_positions DataFrame.")
-    else:
-        print("Data is available in vehicle_positions DataFrame.")
-        print(df_vehicle_positions.head())
+    write_df_chunks_to_postgres(df, table_name, engine)
 
-    write_df_to_postgres(df_trajectory, 'trajectory_info')
-    write_df_to_postgres(df_vehicle_positions, 'vehicle_positions')
+file_paths = ['/tmp/data/trajectory_data.csv', '/tmp/data/vehicle_positions_data.csv']
+table_names = ['trajectory_info', 'vehicle_positions']
 
-
+# Create the engine using the connection string
+engine = create_engine('postgresql+psycopg2://airflow:airflow@ca9f9ad2b94e:5432/traffic_data')
+# Tasks using PythonOperator
 load_trajectory_data = PythonOperator(
     task_id='load_trajectory_data',
-    python_callable=load_data_to_postgres,
+    python_callable=load_data,
+    op_kwargs={'file_path': file_paths[0], 'table_name': table_names[0], 'engine': engine},  # Pass the engine
     dag=dag,
 )
 
 load_vehicle_positions_data = PythonOperator(
     task_id='load_vehicle_positions_data',
-    python_callable=load_data_to_postgres,
+    python_callable=load_data,
+    op_kwargs={'file_path': file_paths[1], 'table_name': table_names[1], 'engine': engine},  # Pass the engine
     dag=dag,
 )
 
+# Set task dependencies
 load_trajectory_data >> load_vehicle_positions_data
