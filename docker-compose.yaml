@@ -232,13 +232,39 @@ services:
     volumes:
       - ./dbt:/dbt
 
-  redash:
-    container_name: redash_container
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  server:
     image: redash/redash:latest
+    command: server
     depends_on:
       - postgres
+      - redis
     ports:
-      - "5000:5000"
+      - "5001:5000"
+    environment:
+      PYTHONUNBUFFERED: 0
+      REDASH_LOG_LEVEL: "INFO"
+      REDASH_REDIS_URL: "redis://redis:6379/0"
+      REDASH_DATABASE_URL: "postgresql+psycopg2://airflow:airflow@postgres/traffic_data"
+      REDASH_COOKIE_SECRET: veryverysecret
+      REDASH_WEB_WORKERS: 4
+
+  worker:
+    image: redash/redash:latest
+    command: scheduler
+    depends_on:
+      - server
+    environment:
+      PYTHONUNBUFFERED: 0
+      REDASH_LOG_LEVEL: "INFO"
+      REDASH_REDIS_URL: "redis://redis:6379/0"
+      REDASH_DATABASE_URL: "postgresql+psycopg2://airflow:airflow@postgres/traffic_data"
+      QUEUES: "queries,scheduled_queries,celery"
+      WORKERS_COUNT: 2
 
 volumes:
   postgres-db-volume:
