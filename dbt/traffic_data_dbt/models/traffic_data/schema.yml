@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: traffic_data
+    database: traffic_data
+    schema: public
+    tables:
+      - name: trajectory_info
+      - name: vehicle_positions
