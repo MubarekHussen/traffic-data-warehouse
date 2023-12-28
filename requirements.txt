@@ -1,0 +1,5 @@
+apache-airflow==2.8.0
+pandas==2.0.3
+pendulum==3.0.0
+setuptools==69.0.3
+SQLAlchemy==1.4.50
