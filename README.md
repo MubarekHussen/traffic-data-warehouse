@@ -33,7 +33,6 @@ The project utilizes the pNEUMA dataset, a large-scale collection of naturalisti
 ![dashboard](screenshots/Redash/Screenshot%20from%202023-12-29%2000-08-11.png)
 ![dashboard](screenshots/Redash/Screenshot%20from%202023-12-29%2000-08-34.png)
 ![dashboard](screenshots/Redash/Screenshot%20from%202023-12-29%2000-09-48.png)
-![dashboard](screenshots/Redash/Screenshot%20from%202023-12-29%2000-10-39.png)
 ![dashboard](screenshots/Redash/Screenshot%20from%202023-12-29%2000-13-36.png)
 
 ## Resources
