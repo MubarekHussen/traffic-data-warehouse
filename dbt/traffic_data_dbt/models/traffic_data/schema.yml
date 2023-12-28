@@ -6,4 +6,42 @@ sources:
     schema: public
     tables:
       - name: trajectory_info
+        description: This table contains information about vehicle trajectories.
+        columns:
+          - name: track_id
+            description: The primary key of the trajectory.
+            tests:
+              - not_null
+              - unique
+          - name: type
+            description: The type of the vehicle.
+          - name: traveled_d
+            description: The distance traveled by the vehicle.
+          - name: avg_speed
+            description: The average speed of the vehicle.
       - name: vehicle_positions
+        description: This table contains information about vehicle positions.
+        columns:
+          - name: id
+            description: The primary key of the vehicle position.
+            tests:
+              - not_null
+              - unique
+          - name: track_id
+            description: The foreign key that references the trajectory_info table.
+            tests:
+              - relationships:
+                  to: source('traffic_data', 'trajectory_info')
+                  field: track_id
+          - name: lat
+            description: The latitude of the vehicle position.
+          - name: lon
+            description: The longitude of the vehicle position.
+          - name: speed
+            description: The speed of the vehicle.
+          - name: lon_acc
+            description: The longitudinal acceleration of the vehicle.
+          - name: lat_acc
+            description: The lateral acceleration of the vehicle.
+          - name: time
+            description: The time of the vehicle position.
