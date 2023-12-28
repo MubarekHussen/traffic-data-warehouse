@@ -26,6 +26,16 @@ The project utilizes the pNEUMA dataset, a large-scale collection of naturalisti
 - `/screenshots`: Includes the screenshots for airflow, dbt, docker setup, cleaned data and redash.
 - `/scripts`: Contains python scripts used to clean and structure the data.
 
+## Dash board
+
+![dashboard](screenshots/Redash/Screenshot%20from%202023-12-29%2000-05-16.png)
+![dashboard](screenshots/Redash/Screenshot%20from%202023-12-29%2000-07-56.png)
+![dashboard](screenshots/Redash/Screenshot%20from%202023-12-29%2000-08-11.png)
+![dashboard](screenshots/Redash/Screenshot%20from%202023-12-29%2000-08-34.png)
+![dashboard](screenshots/Redash/Screenshot%20from%202023-12-29%2000-09-48.png)
+![dashboard](screenshots/Redash/Screenshot%20from%202023-12-29%2000-10-39.png)
+![dashboard](screenshots/Redash/Screenshot%20from%202023-12-29%2000-13-36.png)
+
 ## Resources
 
 - [pNEUMA Dataset](https://open-traffic.epfl.ch/index.php/downloads/#1599047632394-7ca81bff-5221)
